@@ -7,19 +7,43 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'   # או 9.0.x
+          dotnet-version: '8.0.x'   # אפשר גם 9.0.x
 
-      - name: Run dotnet format (folder mode)
+      # יוצר פרויקט זמני שמצביע על קבצי יוניטי
+      - name: Create temp csproj for Unity sources
+        run: |
+          cat > UnityFormat.csproj << 'EOF'
+          <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+              <TargetFramework>net8.0</TargetFramework>
+              <EnableDefaultItems>false</EnableDefaultItems>
+              <LangVersion>latest</LangVersion>
+              <Nullable>enable</Nullable>
+            </PropertyGroup>
+            <ItemGroup>
+              <!-- כל הסקריפטים של יוניטי -->
+              <Compile Include="Assets/Scripts/**/*.cs" />
+              <!-- הוסיפי עוד תקיות אם צריך: -->
+              <!-- <Compile Include="Assets/Editor/**/*.cs" /> -->
+            </ItemGroup>
+          </Project>
+          EOF
+
+      - name: Run dotnet format
         run: |
           dotnet --info
-          dotnet format \
-            --folder \
-            --include "Assets/Scripts" \
+          dotnet format UnityFormat.csproj \
             --verify-no-changes \
             --no-restore \
             --verbosity diagnostic
+
+      # אופציונלי: לנקות את הקובץ הזמני
+      - name: Cleanup temp files
+        if: always()
+        run: rm -f UnityFormat.csproj
