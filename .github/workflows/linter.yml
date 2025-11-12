@@ -1,8 +1,8 @@
 name: Unity C# Linter
 
 on:
-  push:  # Trigger on every push
-  pull_request:  # Also run on pull requests
+  push:
+  pull_request:
 
 jobs:
   lint:
@@ -11,16 +11,22 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.x'  # Adjust to the required .NET version for Unity
+          dotnet-version: '7.0.x'
 
-      - name: Install dotnet-format
-        run: dotnet tool install -g dotnet-format
+      - name: Install dotnet-format (pinned)
+        run: |
+          dotnet tool install -g dotnet-format --version 7.*
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Run dotnet-format
-        # Run dotnet-format in check mode to identify issues only in .cs files in Assets/Scripts and subfolders
-        run: dotnet-format Assets/Scripts --check --folder --include **/*.cs --verbosity diagnostic
+      - name: Run dotnet-format (legacy flags)
+        run: |
+          dotnet-format \
+            --no-restore \
+            --check \
+            --verbosity diagnostic \
+            --include "Assets/Scripts"
