@@ -14,11 +14,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'   # או 9.0.x
 
-      - name: Run dotnet format
+      - name: Run dotnet format (folder mode)
         run: |
           dotnet --info
-          dotnet format style analyzers whitespace \
+          dotnet format \
+            --folder \
+            --include "Assets/Scripts" \
             --verify-no-changes \
             --no-restore \
-            --verbosity diagnostic \
-            --include "Assets/Scripts"
+            --verbosity diagnostic
