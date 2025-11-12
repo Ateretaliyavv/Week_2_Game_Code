@@ -6,27 +6,19 @@ on:
 
 jobs:
   lint:
-    name: Run C# Linter
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0.x'
+          dotnet-version: '8.0.x'   # או 9.0.x
 
-      - name: Install dotnet-format (pinned)
+      - name: Run dotnet format
         run: |
-          dotnet tool install -g dotnet-format --version 7.*
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
-      - name: Run dotnet-format (legacy flags)
-        run: |
-          dotnet-format \
+          dotnet --info
+          dotnet format style analyzers whitespace \
+            --verify-no-changes \
             --no-restore \
-            --check \
             --verbosity diagnostic \
             --include "Assets/Scripts"
